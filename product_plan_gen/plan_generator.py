@@ -5,7 +5,7 @@ from ailoy import Runtime, APIModel, Agent
 from .mermaid_parser import MermaidParser # Import the MermaidParser
 
 # This utility function can be shared across agents
-_thinking_model_id = "gemini-2.5-flash"
+_thinking_model_id = "gemini-2.5-pro"
 _fast_model_id = "gemini-2.5-flash"
 _current_llm_model_id = _thinking_model_id
 

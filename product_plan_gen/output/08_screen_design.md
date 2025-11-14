@@ -9,4 +9,4 @@
 
 | 버전 | 파일 | 작성일 | 작성자 | 비고 |
 | :--- | :--- | :--- | :--- | :--- |
-| 1.0 | [PKI_Management_System_Wireframes_v1.0.pdf](link-to-design-file) | 2023-12-22 | AI Agent | 초기 화면 와이어프레임 및 사용자 흐름 정의. 상세 Mockup은 추후 추가 예정. |
+| v0.1 (초안) | [이동의자유_FMS_Wireframe_v0.1.pptx](./designs/placeholder.pptx) | YYYY-MM-DD | 기획 담당자 | 화면 목록(07_screen_list.md) 기반 주요 화면 Lofi 와이어프레임 |

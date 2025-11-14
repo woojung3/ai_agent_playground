@@ -1,6 +1,7 @@
 ## 💡 **프로세스 표현 가이드**
 
-- 프로세스를 가장 잘 설명할 수 있는 방식을 사용하여 작성합니다. (Flowchart, BPMN, Sequence Diagram, Use Case 등)
+- 프로세스를 가장 잘 설명할 수 있는 방식을 사용하여 작성합니다. (Flowchart, BPMN, Sequence Diagram, Use Case, User Journey 등)
+- BPMN의 경우 UML만 허용되며, 나머지는 Mermaid로 작성해야 합니다.
 - 다이어그램만으로 설명이 부족할 경우, 각 단계의 세부 내용이나 비즈니스 규칙을 보충 설명합니다.
 
 ---
@@ -9,89 +10,37 @@
 
 | 항목 | 설명 |
 | :--- | :--- |
-| **목적** | 외부 OCSP/CRL 서비스 및 KeyLink와 같은 외부 시스템과의 안전하고 효율적인 연동을 통해 인증서 유효성 검증, 폐기 상태 관리, 그리고 암호화 키 관리 기능을 통합하고 확장합니다. 이를 통해 PKI 시스템의 신뢰성과 운영 효율성을 극대화합니다. |
-| **시작 조건** | - PKI 관리 시스템이 성공적으로 설치 및 초기 설정됨. <br/> - 외부 연동 대상 시스템(KeyLink, External PKI 등)의 네트워크 접근성 확보 및 API/프로토콜 정보가 정의됨. <br/> - 시스템 관리자가 연동에 필요한 권한을 보유함. |
-| **종료 조건** | - 외부 시스템(OCSP, CRL, KeyLink)과의 연동이 성공적으로 설정되고 정상적으로 동작함. <br/> - 외부 시스템을 통한 인증서 상태 검증, 폐기 정보 업데이트 및 키 관리 작업이 가능함. <br/> - OCSP 응답 속도 및 CRL 배포 성능 요구사항이 만족됨. |
+| **목적** | 고객이 물품 배송을 요청하면, 관리자가 이를 접수하고 기사에게 배차하여 물품을 성공적으로 목적지까지 운송하고 요금을 정산하는 전체 과정을 정의합니다. |
+| **시작 조건** | 고객이 센터에 유선 등으로 물품 배송을 요청합니다. |
+| **종료 조건** | 기사가 목적지에 물품 배송을 완료하고, 배송 요금 결제가 완료되거나 미수금으로 처리됩니다. |
 
 ---
 
-### **프로세스 표현 (Sequence Diagram)**
+### **프로세스 표현 (Flowchart)**
 
 ```mermaid
-sequenceDiagram
-    actor A as 시스템 관리자
-    participant PMS as PKI 관리 시스템
-    participant A10 as 외부 연계 시스템
-    participant S3 as KeyLink
-    participant S2 as External PKI
-
-    title 외부 시스템 연동 프로세스
-    A->>PMS: 외부 연동 설정 구성 (KeyLink, External PKI, API)
-    activate PMS
-    Note over PMS: API 구현 방식, 프로토콜 정의 (O8, H23)
-
-    PMS->>S3: KeyLink 연동 초기화 요청 (secure protocols)
-    activate S3
-    S3-->>PMS: KeyLink 연동 성공 응답
-    deactivate S3
-
-    PMS->>S2: External PKI 연동 초기화 요청 (OCSP, CRL URL)
-    activate S2
-    S2-->>PMS: External PKI 연동 성공 응답
-    deactivate S2
-    deactivate PMS
-
-    loop 인증서 관련 외부 요청 처리
-        A10->>PMS: 인증서 프로파일 등록/수정 요청 (R27)
-        activate PMS
-        PMS-->>A10: 등록/수정 완료
-        deactivate PMS
-
-        A10->>PMS: CA 인증서 발급 요청 (R28)
-        activate PMS
-        PMS->>S3: 키 생성 및 서명 요청 (secure API calls)
-        activate S3
-        S3-->>PMS: 서명된 인증서/키 반환
-        deactivate S3
-        PMS-->>A10: CA 인증서 발급 완료 (R40)
-        deactivate PMS
-
-        A10->>PMS: CA 인증서 폐기 요청 (R29)
-        activate PMS
-        PMS->>S3: 키 폐기 요청
-        activate S3
-        S3-->>PMS: 폐기 완료 응답
-        deactivate S3
-        PMS-->>A10: CA 인증서 폐기 완료
-        deactivate PMS
-
-        A10->>PMS: 사용자 인증서 발급 요청 (R30)
-        activate PMS
-        PMS-->>A10: 사용자 인증서 발급 완료 (R19)
-        deactivate PMS
+graph TD
+    subgraph 관리자 시스템
+        A[회원, 배송 요청] --> B{관리자, 배송 접수};
+        B --> C[배송 정보 등록];
+        C --> D[배차 대기 상태로 전환];
+        D --> E{자동/수동 배차};
     end
 
-    loop 인증서 유효성 및 폐기 정보 검증
-        A10->>PMS: OCSP 상태 확인 요청
-        activate PMS
-        Note over PMS: OCSP 응답 속도/가용성 고려 (H12, CRS-006)
-        PMS->>S2: 인증서 상태 조회 요청
-        activate S2
-        S2-->>PMS: 인증서 상태 응답
-        deactivate S2
-        PMS-->>A10: OCSP 응답 (R31)
-        deactivate PMS
-
-        A10->>PMS: CRL 다운로드 요청 (모든 CA)
-        activate PMS
-        Note over PMS: CRL 다운로드 성능 문제 고려 (H13, CRS-007)
-        PMS->>S2: 모든 CA CRL 조회 요청
-        activate S2
-        S2-->>PMS: CRL 데이터 반환
-        deactivate S2
-        PMS-->>A10: CRL 배포 (R21)
-        deactivate PMS
+    subgraph 기사앱
+        F[배송 내역 확인] --> G[출발지로 이동];
+        G --> H[물품 인수];
+        H --> I[배송 시작];
+        I --> J[목적지로 이동];
+        J --> K[배송 완료];
+        K --> L[주행 내역/요금 확인];
+        L --> M[요금 결제 요청];
     end
+
+    E -- 배차 완료 --> F;
+
+    style A fill:#fff,stroke:#333,stroke-width:2px
+    style M fill:#fff,stroke:#333,stroke-width:2px
 ```
 
 ---
@@ -100,8 +49,12 @@ sequenceDiagram
 
 | 단계 | 수행자 | 행동 (Action) | 상세 설명 |
 | :--- | :--- | :--- | :--- |
-| 1 | 시스템 관리자 | **외부 연동 설정 구성** | PKI 관리 시스템의 외부 연동 설정 화면에서 KeyLink 연동 정보(API 엔드포인트, 인증 정보), External PKI 연동 정보(OCSP/CRL URL, 신뢰 앵커) 및 API 연동 프로토콜(예: RESTful API via URL registration)을 정의하고 등록합니다. (O8, H23) |
-| 2 | PKI 관리 시스템 | **KeyLink 연동 및 암호화 작업 수행** | 설정된 KeyLink 정보를 기반으로 안전한 통신 채널을 구축합니다. CA 인증서 발급(R28) 및 폐기(R29) 요청 시, KeyLink (S3)의 API를 호출하여 키 생성, 서명, 암호화/복호화 및 키 폐기 등의 핵심 암호화 작업을 수행하고, 그 결과를 PKI 시스템에 반영합니다. (integration.txt) |
-| 3 | 외부 연계 시스템 / PKI 관리 시스템 | **인증서 프로파일/발급/폐기 API 연동** | 외부 연계 시스템(A10)은 PKI 관리 시스템이 제공하는 API를 통해 인증서 프로파일 등록/수정(R27), CA 인증서 발급(R28), 사용자 인증서 발급(R30), CA 인증서 폐기(R29) 등의 요청을 전송하고, PKI 관리 시스템은 이를 처리하여 응답합니다. (CRS-015) |
-| 4 | 외부 연계 시스템 / PKI 관리 시스템 | **OCSP 유효성 검증 및 응답** | 외부 연계 시스템(A10)은 인증서 유효성 검증을 위해 PKI 관리 시스템에 OCSP 상태 확인을 요청합니다. PKI 관리 시스템은 등록된 External PKI(S2) 정보 또는 자체 OCSP 응답자 역할을 통해 인증서의 폐기 상태를 확인하고, 실시간으로 OCSP 응답(R31)을 제공합니다. 이 과정에서 OCSP 응답 속도와 가용성 요구사항(H12, CRS-006)을 충족해야 합니다. |
-| 5 | 외부 연계 시스템 / PKI 관리 시스템 | **CRL 배포 및 동기화** | PKI 관리 시스템은 External PKI(S2)의 CRL 저장소로부터 모든 CA의 CRL을 주기적으로 다운로드하고 최신 상태를 유지합니다. 외부 연계 시스템(A10)이 CRL 다운로드를 요청하면, PKI 관리 시스템은 최신 CRL 정보를 효율적으로 배포합니다. 이 때 모든 CA의 CRL을 다운로드하고 배포할 때 발생할 수 있는 성능 문제(H13, CRS-007)를 해결해야 합니다. |
+| 1 | 회원 | 배송 요청 | 고객이 센터에 전화하여 출발지, 목적지, 물품 정보를 전달하고 배송 서비스를 요청합니다. |
+| 2 | 일반 관리자 | 배송 접수 및 등록 | 관리자는 고객의 요청사항을 시스템에 입력하여 배송 건을 등록합니다. 이때 일반 예약과 동일 시간대에 중복 접수가 가능합니다. |
+| 3 | 시스템/관리자 | 배송 건 배차 | 등록된 배송 건은 '배차대기' 상태가 되며, 관리자는 스케줄과 위치를 고려하여 기사에게 수동으로 배차하거나 시스템이 자동으로 배차합니다. |
+| 4 | 기사 | 배차 내역 확인 | 기사는 기사앱을 통해 자신에게 배정된 배송 내역(출발지, 목적지 등)을 확인합니다. |
+| 5 | 기사 | 출발지로 이동 | 기사는 내비게이션 앱을 연동하여 물품을 인수할 출발지로 이동합니다. |
+| 6 | 기사 | 물품 인수 및 배송 시작 | 출발지에 도착하여 물품을 인수한 후, 기사앱에서 '배송 시작' 버튼을 눌러 주행을 시작합니다. |
+| 7 | 기사 | 목적지로 이동 | 기사는 내비게이션 앱의 안내에 따라 최종 목적지로 이동합니다. |
+| 8 | 기사 | 배송 완료 | 목적지에 도착하여 물품 인계를 완료한 후, 기사앱에서 '주행 완료' 버튼을 누릅니다. |
+| 9 | 기사 | 요금 확인 및 결제 | 시스템에 기록된 주행 정보를 바탕으로 산정된 최종 요금을 확인하고 결제를 진행합니다.<br/>- **현안**: 현재 시스템에서는 선불, 착불 등 결제 시점이나 주체를 선택할 수 있는 기능이 없습니다. (Hn10) |

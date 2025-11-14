@@ -5,14 +5,53 @@
 
 ---
 
-### **페르소나 예시**
+### **주요 페르소나 (Key Personas)**
+
+제품 요구사항 명세(CRS) 작성을 위해, 제품과 상호작용할 주요 사용자 그룹을 정의합니다. 각 페르소나는 특정 목표와 페인 포인트를 가지며, 이는 제품 기능 개발의 중요한 기반이 됩니다.
+
+---
+
+#### 1. 김민지 대리 (운영 관리자)
 
 | 구분 | 내용 |
 | :--- | :--- |
-| **이름** | 김현수 |
-| **개요** | 대규모 IT 인프라를 관리하는 시스템 관리자입니다. V2X 통신 환경과 사내 시스템 인증서 관리를 위해 새로운 PKI 시스템 도입을 추진하고 있습니다. 복잡한 인증서 라이프사이클 관리, HSM 연동, 고가용성 보장, 그리고 엄격한 보안 정책 준수에 대한 요구사항이 많습니다. |
-| **한줄 묘사** | "안전하고 효율적인 인증서 관리가 곧 비즈니스 핵심!" |
-**구체 목표** | PKI 시스템을 통해 Root/Sub CA 및 사용자 인증서 발급, 갱신, 폐기 과정을 자동화하고, HSM을 통한 키 관리 보안을 강화하며, DR(재해 복구) 시스템을 포함한 고가용성 아키텍처를 구축하여 안정적인 서비스를 제공하는 것입니다. 또한, 외부 시스템과의 유연한 연동 및 정책 기반의 확장성을 확보하여 운영 효율성을 극대화하고자 합니다. |
+| **이름** | 김민지 대리 |
+| **개요** | '이동의자유' 부산센터에서 3년째 근무 중인 운영 관리자입니다. 주 업무는 전화로 예약을 접수하고, 기사들의 스케줄을 관리하며 배차를 총괄하는 것입니다. |
+| **한줄 묘사** | "오후 4시만 되면 전화기가 불타는 것 같아요. 조금 더 체계적으로 일하고 싶어요." |
+| **구체 목표** | - 피크 시간대(특히 오후 4시경)의 예약 전화를 놓치지 않고 신속하게 처리하고 싶다.<br>- 기사들의 스케줄과 휴식 시간을 수동으로 관리하는 데 드는 시간을 줄이고 싶다.<br>- 예약 변경이나 취소 시 발생하는 고객 및 기사와의 커뮤니케이션 오류를 줄이고 싶다. |
+
+---
+
+#### 2. 이지훈 (기사)
+
+| 구분 | 내용 |
+| :--- | :--- |
+| **이름** | 이지훈 |
+| **개요** | '이동의자유' 소속의 베테랑 기사로, 매일 승객을 태우고 운행하며 앱을 통해 배차 및 운행 정보를 관리합니다. 효율적이고 안전한 운행을 최우선으로 생각합니다. |
+| **한줄 묘사** | "운전에만 집중하고 싶은데, 앱 조작이나 서류 작업이 너무 많아요." |
+| **구체 목표** | - 운행 중 앱 강제 업데이트 없이 안전하게 운행하고 싶다. (CRS-014)<br>- 주유 및 정비 내역을 앱에서 간편하게 등록하고, 가능하다면 자동 연동되어 처리되기를 원한다. (CRS-010, CRS-011)<br>- 배송 서비스 요금 결제 방식을 유연하게 선택하고, 미수금 처리 과정이 명확하기를 원한다. (CRS-015, CRS-016)<br>- 정확한 배차 정보와 승객 정보를 앱에서 확인하여 효율적으로 운행하고 싶다. |
+
+---
+
+#### 3. 박선영 (승객)
+
+| 구분 | 내용 |
+| :--- | :--- |
+| **이름** | 박선영 |
+| **개요** | '이동의자유' 서비스를 정기적으로 이용하는 승객으로, 주로 병원 방문이나 출퇴근 시 서비스를 이용합니다. 안정적이고 예측 가능한 이동 서비스를 기대합니다. |
+| **한줄 묘사** | "예약한 시간에 맞춰 안전하게 이동하는 게 가장 중요해요." |
+| **구체 목표** | - 간편하게 예약을 하고, 예약 변경이나 취소 시 명확한 알림을 받고 싶다. (CRS-003 관련)<br>- 배차된 차량의 위치나 도착 예정 시간을 실시간으로 확인하고 싶다.<br>- 안전하고 편안한 이동 서비스를 제공받고 싶다.<br>- 서비스 이용 후 피드백을 쉽게 전달하고 싶다. |
+
+---
+
+#### 4. 최민준 (시스템 관리자)
+
+| 구분 | 내용 |
+| :--- | :--- |
+| **이름** | 최민준 |
+| **개요** | '이동의자유' FMS의 전반적인 시스템 운영 및 유지보수를 담당하는 IT 관리자입니다. 시스템의 안정성과 데이터 무결성을 최우선으로 생각합니다. |
+| **한줄 묘사** | "시스템이 안정적으로 돌아가야 다른 팀들이 문제없이 일할 수 있죠." |
+| **구체 목표** | - 시스템의 모든 데이터(예: 회원, 예약, 운행 기록)가 정확하고 일관성 있게 관리되기를 원한다. (CRS-005, CRS-009 관련)<br>- 기사들의 약관 동의 이력 등 법적 준수 사항을 시스템적으로 관리하고 싶다. (CRS-012)<br>- 운영팀의 요청에 따라 시스템 설정을 유연하게 변경하고, 문제 발생 시 신속하게 대응하고 싶다. (CRS-006, CRS-007, CRS-008, CRS-013, CRS-017 관련) |
 
 ---
 
@@ -25,21 +64,20 @@
 
 | ID | Description (User Story) | Category | Priority | Dependency | Remark |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| CRS-001 | **As a 정책 관리자**, I want to clearly define and configure certificate issuance policies, so that I can meet specific customer requirements for certificate profiles. | 정책 관리 | High | R1, R2, P3 | CP/CPS 및 EKU 정의를 포함합니다. (H2) |
-| CRS-002 | **As a 시스템 관리자**, I want comprehensive observability tools integrated into the system, so that I can proactively monitor system health, performance, and security events. | 시스템 운영 | High | R4 | 성능 요구사항 만족 여부를 확인할 수 있어야 합니다. (H3) |
-| CRS-003 | **As a 시스템 관리자**, I want to be able to conduct DR rehearsal tests easily, so that I can ensure business continuity and quick recovery in case of disaster. | 시스템 운영 | High | R7, R8, H5, H6 | DB/HSM 이중화 환경에서의 데이터 동기화 및 DR 리허설 테스트를 포함합니다. (H4) |
-| CRS-004 | **As an ADMIN User**, I want to directly issue TLS Server/Client certificates, so that I can have more flexibility in managing specific application requirements. | 인증서 관리 | Medium | R12 | 현재 시스템 내부 TLS 인증서 관리 방식에 대한 개선이 필요합니다. (H8, H9, O2) |
-| CRS-005 | **As a 정책 관리자**, I want to add custom extension fields to certificate issuance profiles, so that I can support unique certificate requirements. | 정책 관리 | High | P3, R24, R25, R26 | Custom OID 필드 및 값의 생성/수정/삭제 관리가 용이해야 합니다. (H10, O3, O6, O7) |
-| CRS-006 | **As an 외부 연계 시스템**, I want OCSP responses to be fast and highly available, so that I can efficiently validate certificate statuses. | 외부 연동 | High | R31 | OCSP 응답 속도 및 가용성에 대한 서비스 수준 협약(SLA) 정의가 필요합니다. (H12) |
-| CRS-007 | **As an 외부 연계 시스템**, I want to download CRLs from all CAs efficiently without performance degradation, so that I can maintain up-to-date revocation information. | 외부 연동 | High | R21 | 모든 CA의 CRL 다운로드 시 성능 문제가 발생하지 않도록 처리해야 합니다. (H13, O9) |
-| CRS-008 | **As a 시스템 관리자**, I want to verify system validity when a specific node fails, so that I can ensure the high availability and fault tolerance of the PKI system. | 시스템 운영 | High | R7, R8, S1, S4 | 이중화 환경에서 특정 노드 장애 발생 시 시스템 유효성을 확인할 수 있어야 합니다. (H14) |
-| CRS-009 | **As a 시스템 관리자**, I want a defined disaster recovery procedure for server failures, including the correct sequence for restoring components like the database, so that I can efficiently recover the system. | 시스템 운영 | High | O11 | 복구 후 기능 테스트에 대한 절차 및 책임이 명확히 정의되어야 합니다. (H17, H18) |
-| CRS-010 | **As an ADMIN User**, I want to define and select various certificate revocation methods, so that I can apply the appropriate strategy based on the revocation reason. | 인증서 관리 | Medium | R22, R23, H11 | 인증서 폐기 처리 로직에서 TimeZone/Date/Time 고려가 필수적입니다. (H19) |
-| CRS-011 | **As a 시스템 관리자**, I want a clear policy on the management and custody of HSM user/administrator private keys, so that I can maintain high security standards. | 키 관리 | High | S1 | 비밀키 복구 기능의 필요성 및 HSM 사용자/관리자 비밀키 관리 주체에 대한 정책 결정이 필요합니다. (H20, H21) |
-| CRS-012 | **As a QA**, I want a comprehensive functional integration test module, so that I can efficiently verify the system's overall functionality and stability. | QA | High | R3 | MVP 기능 테스트와 연동하여 시스템 전반의 기능적 통합 테스트를 지원해야 합니다. (O1) |
-| CRS-013 | **As an ADMIN User**, I want to be able to modify certificate issuance requests even after they have been submitted, so that I can correct errors or update details before final issuance. | 인증서 관리 | Medium | R17, R18 | 요청 수정 후 재승인 워크플로우를 고려하여 기능을 추가해야 합니다. (O4) |
-| CRS-014 | **As a 시스템 관리자**, I want CRL distribution to be automated based on predefined rules, schedules, and policies, so that revocation information is always up-to-date and widely available. | 인증서 관리 | High | R20, R21 | 정해진 규칙/시간/정책에 따라 CRL 파일 생성 및 배포가 자동화되어야 합니다. (O5) |
-| CRS-015 | **As an 엔지니어**, I want the system to support API implementation via URL registration for external systems, so that I can easily integrate and manage external services. | 외부 연동 | High | R28, R29, R30, R31 | 외부 연계 시스템(KeyLink, External PKI)과의 API 연동 프로토콜 및 방식을 명확히 정의해야 합니다. (H23, O8) |
-| CRS-016 | **As a 시스템 관리자**, I want robust database backup and recovery features, so that I can protect critical certificate data and ensure business continuity. | 시스템 운영 | High | S4, R7 | 데이터베이스 이중화 및 데이터 동기화 테스트(H5)를 통해 안정적인 백업/복구 환경을 제공해야 합니다. (O11) |
-| CRS-017 | **As a 보안 엔지니어**, I want all cryptographic keys to be securely generated and stored within an HSM, so that I can meet stringent security and compliance requirements. | 키 관리 | High | S1, R11 | Root CA 및 Issuing CA 키를 포함한 모든 중요한 키는 HSM에 안전하게 보관되어야 합니다. (PRD, integration.txt) |
-| CRS-018 | **As a 시스템 관리자**, I want comprehensive audit logs for all PKI operations, so that I can track activities, ensure accountability, and meet auditing requirements. | 시스템 운영 | High | P2 | 운영 로그 정책을 수립하고 모든 PKI 작업에 대한 감사 로그를 기록해야 합니다. (PRD) |
+| CRS-001 | **As a** 관리자, **I want to** 피크 시간대에 예약을 '배차대기' 상태로 일괄 접수한 후 나중에 자동/수동 배차를 진행하여 **so that** 전화 응대를 신속하게 처리하고 배차 업무 효율을 높이고 싶습니다. | 예약/배차 | High | | 16시쯤 전화가 몰림, 배차대기로 일괄 예약접수 후 자동 혹은 수동배차로 진행 |
+| CRS-002 | **As a** 관리자, **I want to** 상습적으로 예약을 무단 취소하는 승객을 식별하고 블랙리스트로 표시하여 **so that** 예약 접수 시 해당 정보를 참고하여 노쇼(No-show)를 예방하고 싶습니다. | 예약/배차 | Medium | | 상습 무단 취소 승객으로 블랙리스트 표시 기능 필요 |
+| CRS-003 | **As a** 관리자, **I want to** 일괄 배차 시 예약 변경이나 취소 내용을 승객에게 문자로 발송하여 **so that** 중요한 정보 변경 사항을 누락 없이 전달하고 싶습니다. | 예약/배차 | Medium | | 일괄배차의 예약취소와 예약변경 문자 송신 기능 필요 |
+| CRS-004 | **As a** 관리자, **I want to** 승객에게 발송된 문자의 성공/실패 내역을 조회하여 **so that** 문자 발송 관련 고객 클레임에 정확하게 대응하고 싶습니다. | 시스템 관리 | High | | 문자 발송에 대한 성공/실패에 대한 내역을 관리자에서 확인 가능하면 좋겠음 (클레임 많음) |
+| CRS-005 | **As a** 관리자, **I want to** 회원 및 예약 정보 수정 이력을 시스템에 기록하고 조회하여 **so that** 고객 문의나 분쟁 발생 시 변경 내역을 명확히 확인하고 대응하고 싶습니다. | 회원 관리 | Medium | | 회원/예약 수정 이력 저장 기능 필요 |
+| CRS-006 | **As a** 관리자, **I want to** 기사들의 휴식 시간을 자동으로 배정하는 정책을 설정하여 **so that** 기사들의 근로 조건을 준수하고 수동 스케줄링의 번거로움을 줄이고 싶습니다. | 기사/스케줄 관리 | Medium | | 자동 휴식 배정 정책 필요 |
+| CRS-007 | **As a** 관리자, **I want to** 차량 1대당 배정 가능한 최대 기사 수를 3명(또는 그 이상)으로 설정하여 **so that** 실제 운영 환경(VoC: 15명)을 반영하고 유연한 기사 배치가 가능하게 하고 싶습니다. | 기사/스케줄 관리 | Medium | | 차량에 15명의 기사 등록가능 - VoC 반영, 차량 1대당 최대 기사 3명까지 등록가능 |
+| CRS-008 | **As a** 관리자, **I want to** 강제 주행 종료 시 요금 산정 방식을 명확한 정책에 따라 처리하여 **so that** 요금 정산의 혼선을 줄이고 일관된 기준을 적용하고 싶습니다. | 정산/결제 | High | | 강제 주행 종료시 요금 산정 방식 정책 필요 |
+| CRS-009 | **As a** 관리자, **I want to** 주행 후 탑승자 상태(탑승/미탑승) 변경 시, 관련 통계 데이터(업무일지, 이용현황)가 정확하게 재계산되어 **so that** 데이터 불일치 문제를 해결하고 신뢰도 높은 리포트를 얻고 싶습니다. | 통계/리포트 | High | | 용도별 이용현황의 전체와 각 세부 항목의 합이 맞지 않는 스펙 개선 필요 |
+| CRS-010 | **As a** 기사, **I want to** 주유나 정비 내역을 기사앱에서 직접 등록하여 **so that** 관리자에게 구두로 전달하는 번거로움 없이 신속하게 비용 처리를 요청하고 싶습니다. | 기사앱 | Low | | 주유나 정비 등 기사앱에서도 직접 등록할 수 있게 개선해달라는 요구사항도 존재 |
+| CRS-011 | **As a** 기사, **I want to** OBD 장치를 통해 주유 및 정비 정보를 자동으로 조회하여 **so that** 수동 입력의 오류를 줄이고 차량 관리를 효율화하고 싶습니다. | 기사앱/OBD | Low | | OBD를 통해 주유, 정비 정보를 조회할 수 있으면 좋겠음 |
+| CRS-012 | **As a** 관리자, **I want to** 기사의 약관 동의 이력(동의자, 시간)을 시스템에 기록하고 관리하여 **so that** 법적 이슈나 감사에 대비하고, 기사가 반복적으로 동의하는 불편을 해소하고 싶습니다. | 시스템 정책 | High | | 약관동의가 계속 발생함. 저장도 안 됨. 약관동의자, 동의시간에 대해서 내역 남길 수 있도록 처리 필요 |
+| CRS-013 | **As a** 관리자, **I want to** 퇴근 처리를 잊은 기사에 대해 관리자 시스템에서 후처리를 할 수 있는 방안을 마련하여 **so that** 다음 날 운행 데이터가 꼬이는 문제를 방지하고 싶습니다. | 기사앱/시스템 | Medium | | 퇴근처리를 하지 않아 후처리가 번거로움 (해당 기사로 로그인하여 퇴근하기 시도 등) |
+| CRS-014 | **As a** 기사, **I want to** 주행 중에는 앱 강제 업데이트가 실행되지 않도록 하여 **so that** 운행 안전성을 확보하고 서비스 중단을 방지하고 싶습니다. | 기사앱 | High | | 앱 강제 업데이트 - 주행중에는 X |
+| CRS-015 | **As a** 기사, **I want to** 배송 서비스의 요금 결제 방식을 선불/착불 등으로 선택하여 **so that** 실제 배송 상황에 맞춰 유연하게 요금을 정산하고 싶습니다. | 기사앱/배송 | Medium | | 배송 요금을 누가 언제 결제할지에 대한 선택권이 없음. 선불인지 착불인지 등 |
+| CRS-016 | **As a** 기사, **I want to** 미수금 발생 시, 사유를 먼저 선택한 후 결제를 취소하는 프로세스로 변경하여 **so that** 미수금 발생 원인을 명확히 기록하고 후속 조치를 용이하게 하고 싶습니다. | 기사앱/결제 | Low | | 미수금 사유 선택 후 결제취소로 플로우 바꾸면 좋을 것 같습니다 |
+| CRS-017 | **As a** 관리자, **I want to** 기사앱 공지사항에 딥링크를 적용하거나 표시 기한을 설정하여 **so that** 사용자가 특정 페이지로 바로 이동하거나, 기간이 만료된 공지가 노출되지 않도록 하고 싶습니다. | 기사앱/시스템 | Low | | 공지사항 딥링크 처리 혹은 표시 기한 설정 |

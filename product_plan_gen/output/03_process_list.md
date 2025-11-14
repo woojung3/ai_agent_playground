@@ -11,14 +11,12 @@
 
 | 프로세스명 | 핵심 설명 | 상태 | 링크 |
 | :--- | :--- | :--- | :--- |
-| 인증서 발급 라이프사이클 관리 | Root CA, Sub CA, 사용자 인증서 발급 및 요청 수정 등 인증서의 생성 및 초기 관리 과정을 포함합니다. | 계획 중 | [상세 보기](./process_issuance.md) |
-| 인증서 폐기 및 CRL 관리 | 발급된 인증서의 폐기 처리 로직, 폐기 목록(CRL) 생성 및 자동 배포 프로세스를 정의합니다. | 계획 중 | [상세 보기](./process_revocation_crl.md) |
-| PKI 정책 및 프로파일 관리 | 인증서 발급 정책, CA/RA 프로파일, Custom OID 필드/값 정의 및 관리 기능을 다룹니다. | 계획 중 | [상세 보기](./process_policy_profile.md) |
-| 보안 키 관리 및 HSM 연동 | HSM(Hardware Security Module)을 통한 키 생성, 안전한 저장, HSM 이중화 및 비밀키 관리 정책을 수립합니다. | 계획 중 | [상세 보기](./process_key_hsm.md) |
-| 시스템 고가용성 및 DR 관리 | MariaDB 및 HSM 이중화 설정, DR(재해 복구) 리허설 테스트, 시스템 복구 절차 등을 포함합니다. | 계획 중 | [상세 보기](./process_ha_dr.md) |
-| 외부 시스템 연동 (OCSP/CRL/KeyLink) | External PKI (OCSP, CRL), KeyLink와의 연동 및 API 구현 방식을 상세화합니다. | 계획 중 | [상세 보기](./process_external_integration.md) |
-| 시스템 모니터링 및 감사 로그 | 시스템 건강 상태 모니터링, Observability 구축, 운영 로그 및 감사 로그 관리, 노드 장애 시 유효성 확인을 다룹니다. | 계획 중 | [상세 보기](./process_monitoring_audit.md) |
-| QA 및 통합 테스트 | MVP 기능 테스트, 성능 부하 테스트, 기능 통합 테스트 모듈 구현 및 검증 프로세스를 포함합니다. | 계획 중 | [상세 보기](./process_qa_testing.md) |
+| P-01: 시스템 초기 설정 | 슈퍼어드민이 센터를 생성하고, 일반 관리자를 등록하여 서비스 운영을 준비하는 전체 과정입니다. | 분석중 | [상세 보기](./03_01_process_initial_setup.md) |
+| P-02: 예약 및 배차 | 관리자가 고객의 예약 요청을 접수하고, 기사에게 예약을 수동 또는 자동으로 배차하는 과정입니다. | 분석중 | [상세 보기](./03_02_process_reservation_dispatch.md) |
+| P-03: 주행 및 결제 | 기사가 배차를 수락하고 승객을 목적지까지 운행한 후, 요금을 결제받고 관리자가 후처리하는 과정입니다. | 분석중 | [상세 보기](./03_03_process_driving_payment.md) |
+| P-04: 운영 관리 | 회원, 기사, 차량 정보 및 스케줄, 공지사항 등 일상적인 FMS 운영을 위한 관리 업무 프로세스입니다. | 분석중 | [상세 보기](./03_04_process_operational_management.md) |
+| P-05: 기사앱 온보딩 | 기사가 처음 앱을 설치하고 로그인하여 OBD 및 결제 단말기 연동까지 완료하는 초기 설정 과정입니다. | 분석중 | [상세 보기](./03_05_process_driver_onboarding.md) |
+| P-06: 배송 서비스 | 관리자가 물품 배송을 접수하고, 기사가 물품을 픽업하여 목적지까지 배송하는 과정입니다. | 분석중 | [상세 보기](./03_06_process_delivery_service.md) |
 
 ---
 ## Summary for Automation
@@ -27,28 +25,22 @@
 {
   "processes": [
     {
-      "process_name": "인증서 발급 라이프사이클 관리"
+      "process_name": "P-01: 시스템 초기 설정"
     },
     {
-      "process_name": "인증서 폐기 및 CRL 관리"
+      "process_name": "P-02: 예약 및 배차"
     },
     {
-      "process_name": "PKI 정책 및 프로파일 관리"
+      "process_name": "P-03: 주행 및 결제"
     },
     {
-      "process_name": "보안 키 관리 및 HSM 연동"
+      "process_name": "P-04: 운영 관리"
     },
     {
-      "process_name": "시스템 고가용성 및 DR 관리"
+      "process_name": "P-05: 기사앱 온보딩"
     },
     {
-      "process_name": "외부 시스템 연동 (OCSP/CRL/KeyLink)"
-    },
-    {
-      "process_name": "시스템 모니터링 및 감사 로그"
-    },
-    {
-      "process_name": "QA 및 통합 테스트"
+      "process_name": "P-06: 배송 서비스"
     }
   ]
 }
