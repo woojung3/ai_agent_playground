@@ -38,3 +38,4 @@ Thumbs.db
 
 # Gemini specific ignores
 .gemini/
+product_plan_gen/output/**
