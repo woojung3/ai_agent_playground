@@ -97,32 +97,33 @@ class PdfTranslationAgent:
             start_markers = [(m.start(), m.end()) for m in re.finditer(start_marker_pattern, content)]
             end_markers = [(m.start(), m.end()) for m in re.finditer(end_marker_pattern, content)]
 
-            if len(start_markers) != len(end_markers):
-                print(f"Warning: Unbalanced markers in {output_file_path}. Cannot reliably resume. Starting from the beginning.")
-                return "", []
-            
-            # Ensure markers are correctly ordered and we have enough markers for resume_index
-            if resume_index > len(start_markers):
-                print(f"Warning: resume_index ({resume_index}) is greater than the number of completed chunks ({len(start_markers)}). Starting from the beginning.")
-                return "", []
+            # If markers are unbalanced, trust the number of end markers as they are written last.
+            # This handles cases where the script crashed after writing a start marker but before an end marker.
+            num_valid_chunks = min(len(start_markers), len(end_markers))
 
+            if resume_index > num_valid_chunks:
+                print(f"Warning: Progress file indicates resumption from chunk {resume_index}, but only {num_valid_chunks} chunks were found in the output file. Context history for the LLM may be incomplete.")
+            
             last_valid_end_index = 0
-            for i in range(resume_index): # Iterate only up to resume_index - 1
+            # We can only load as many chunks as are actually present in the file.
+            for i in range(min(resume_index, num_valid_chunks)):
                 start_match_start, start_match_end = start_markers[i]
                 end_match_start, end_match_end = end_markers[i]
 
-                if start_match_start > end_match_start: # Should not happen if previous check passed, but for safety
-                    print(f"Warning: Malformed markers (start after end) in chunk {i}. Cannot reliably resume. Starting from the beginning.")
-                    return "", []
+                # This check is a safeguard for severely corrupted files.
+                if start_match_start > end_match_start:
+                    print(f"Warning: Malformed markers (start after end) in chunk {i}. Stopping state load here.")
+                    break
 
                 # Correctly extract raw translated chunk content - between start and end marker
-                raw_translated_chunk = content[start_match_end:end_match_end].strip() 
+                raw_translated_chunk = content[start_match_end:end_match_start].strip()
                 initial_history_chunks.append(raw_translated_chunk)
                 if len(initial_history_chunks) > self.HISTORY_SIZE:
                     initial_history_chunks.pop(0)
 
                 last_valid_end_index = end_match_end
-
+            
+            # The content to restore is up to the end of the last valid chunk.
             previous_full_markdown_content = content[:last_valid_end_index]
 
         return previous_full_markdown_content, initial_history_chunks
@@ -186,12 +187,10 @@ class PdfTranslationAgent:
         # Load previous translation state if resuming
         translated_full_content_str, self._translated_chunks_history = self._load_previous_translation_state(output_path, resume_from_chunk_index)
         
-        # Initialize the output file based on resume_from_chunk_index
-        # If resuming, the file already contains the previous content.
-        # If starting fresh, clear the file.
-        if resume_from_chunk_index == 0:
-            with open(output_path, 'w', encoding='utf-8') as f:
-                f.write("") # Clear the file
+        # If resuming, truncate the file to the last known good state to remove any partial writes.
+        # If not resuming, this will effectively create an empty file.
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(translated_full_content_str)
 
         # Prepare the chunk iterator, skipping already processed chunks if resuming
         chunk_iterator = self._read_and_chunk_markdown(temp_untranslated_md_path, max_chunk_chars=self.MAX_TRANSLATION_CHUNK_SIZE)
@@ -229,9 +228,6 @@ class PdfTranslationAgent:
                     else:
                         print(f"All {self.MAX_RETRIES} attempts failed for chunk {chunk_num + 1}.")
                         print("Translation terminated due to unrecoverable LLM error.")
-                        # Clean up progress file to avoid resuming from a failed state
-                        if os.path.exists(progress_file_path):
-                            os.remove(progress_file_path)
                         sys.exit(1) # Terminate the program with an error code
             
             # Construct the chunk with markers to write
