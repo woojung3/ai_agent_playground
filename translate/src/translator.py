@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 
 class Translator:
     """
@@ -19,8 +19,7 @@ class Translator:
         self.base_system_prompt = base_system_prompt # Store base system prompt
         
         if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel(self.model_name)
+            self.client = genai.Client()
             print(f"Translator initialized with model '{self.model_name}'.")
         else:
             raise ValueError("GEMINI_API_KEY environment variable not set. Please set it to use the Gemini API for translation.")
@@ -61,7 +60,7 @@ class Translator:
 Translated Text:
 """)
             prompt = "\n\n".join(prompt_parts)
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             if not response.text:
                 return "" # Return empty string for truly empty LLM response
             return response.text

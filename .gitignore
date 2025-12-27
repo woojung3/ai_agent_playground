@@ -40,3 +40,4 @@ Thumbs.db
 .gemini/
 product_plan_gen/output/**
 translate/output/**
+translate/input/**
