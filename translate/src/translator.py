@@ -5,7 +5,7 @@ class Translator:
     """
     A class to handle text translation using the Gemini API.
     """
-    def __init__(self, model_name="gemini-2.5-flash", base_system_prompt=""): # Added base_system_prompt
+    def __init__(self, model_name, base_system_prompt=""): # Added base_system_prompt
         print(f"TRACE: Entering Translator.__init__(model_name='{model_name}', base_system_prompt='{base_system_prompt[:50]}...').") # Added base_system_prompt to trace
         """
         Initializes the Translator.

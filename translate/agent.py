@@ -13,12 +13,12 @@ class PdfTranslationAgent:
     """
     An agent to translate a PDF file into a structured, translated Markdown file.
     """
-    MIN_CHUNK_SIZE = 3000 # Minimum character count for a translated chunk to be marked with start/end tags
+
     MAX_TRANSLATION_CHUNK_SIZE = 10000 # Max character count for chunks sent to LLM
     MAX_RETRIES = 5
     RETRY_DELAY_SECONDS = 5
     PROGRESS_FILE_NAME = "translation_progress.txt"
-    def __init__(self, pdf_path, output_dir="output", model_name="gemini-2.5-flash", global_system_context="", base_system_prompt=""): # Added new parameters
+    def __init__(self, pdf_path, model_name, output_dir="output", global_system_context="", base_system_prompt=""): # Added new parameters
         print(f"TRACE: Entering PdfTranslationAgent.__init__(pdf_path='{pdf_path}', output_dir='{output_dir}', model_name='{model_name}', global_system_context='{global_system_context[:50]}...', base_system_prompt='{base_system_prompt[:50]}...').") # Added new parameters
         self.pdf_path = pdf_path
         self.output_dir = output_dir
@@ -28,8 +28,7 @@ class PdfTranslationAgent:
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         
-        # Initialize an empty list to buffer translatable elements
-        self._translation_batch_buffer = []
+
         self._translated_chunks_history = [] # History of translated chunks for context
         self.HISTORY_SIZE = 3 # Number of past chunks to keep for summary
 
@@ -78,13 +77,12 @@ class PdfTranslationAgent:
             summary_text += f"Chunk {i+1}: {chunk[:200]}...\n" # Take first 200 chars for summary
         return summary_text
 
-    def _load_previous_translation_state(self, output_file_path, resume_index):
-        print(f"TRACE: Entering PdfTranslationAgent._load_previous_translation_state(output_file_path='{output_file_path}', resume_index={resume_index}).")
+    def _load_translation_history(self, output_file_path, resume_index):
+        print(f"TRACE: Entering PdfTranslationAgent._load_translation_history(output_file_path='{output_file_path}', resume_index={resume_index}).")
         """
-        Loads previously translated content and history for resuming.
-        Returns (string of previous full markdown content, list of raw translated chunks for history).
+        Loads the history of previously translated chunks for context.
+        Returns a list of raw translated chunks for history.
         """
-        previous_full_markdown_content = ""
         initial_history_chunks = []
 
         if os.path.exists(output_file_path) and resume_index > 0:
@@ -97,36 +95,27 @@ class PdfTranslationAgent:
             start_markers = [(m.start(), m.end()) for m in re.finditer(start_marker_pattern, content)]
             end_markers = [(m.start(), m.end()) for m in re.finditer(end_marker_pattern, content)]
 
-            # If markers are unbalanced, trust the number of end markers as they are written last.
-            # This handles cases where the script crashed after writing a start marker but before an end marker.
             num_valid_chunks = min(len(start_markers), len(end_markers))
 
             if resume_index > num_valid_chunks:
                 print(f"Warning: Progress file indicates resumption from chunk {resume_index}, but only {num_valid_chunks} chunks were found in the output file. Context history for the LLM may be incomplete.")
             
-            last_valid_end_index = 0
             # We can only load as many chunks as are actually present in the file.
-            for i in range(min(resume_index, num_valid_chunks)):
+            # We iterate backwards from the last valid chunk to get the most recent history.
+            num_chunks_to_load = min(self.HISTORY_SIZE, min(resume_index, num_valid_chunks))
+            
+            for i in range(num_valid_chunks - num_chunks_to_load, num_valid_chunks):
                 start_match_start, start_match_end = start_markers[i]
                 end_match_start, end_match_end = end_markers[i]
 
-                # This check is a safeguard for severely corrupted files.
                 if start_match_start > end_match_start:
-                    print(f"Warning: Malformed markers (start after end) in chunk {i}. Stopping state load here.")
-                    break
+                    print(f"Warning: Malformed markers (start after end) in chunk {i}. Skipping for history.")
+                    continue
 
-                # Correctly extract raw translated chunk content - between start and end marker
                 raw_translated_chunk = content[start_match_end:end_match_start].strip()
                 initial_history_chunks.append(raw_translated_chunk)
-                if len(initial_history_chunks) > self.HISTORY_SIZE:
-                    initial_history_chunks.pop(0)
 
-                last_valid_end_index = end_match_end
-            
-            # The content to restore is up to the end of the last valid chunk.
-            previous_full_markdown_content = content[:last_valid_end_index]
-
-        return previous_full_markdown_content, initial_history_chunks
+        return initial_history_chunks
 
 
 
@@ -157,25 +146,29 @@ class PdfTranslationAgent:
                     resume_from_chunk_index = 0
         
         # Phase 1: Generate Untranslated Markdown
-        # 1. Parse PDF into structured elements
-        elements = list(parse_pdf(self.pdf_path))
-        print(f"PDF Parsed into {len(elements)} structural elements.")
-        
-        # 2. Format ALL elements to untranslated Markdown
-        # This will use format_element_to_markdown on original elements.
-        # The marker types (chunk_start_marker, chunk_end_marker, translated_markdown_chunk)
-        # will not be present in 'elements' from parse_pdf, so format_element_to_markdown
-        # will act as a simple formatter for original elements.
-        untranslated_md_elements = [format_element_to_markdown(elem) for elem in elements]
-
-        # 3. Stitch ALL untranslated markdown parts into a single document
-        untranslated_markdown_content = stitch_markdown(untranslated_md_elements)
-        
-        # 4. Save this untranslated Markdown to a temporary file
         temp_untranslated_md_path = os.path.join(self.output_dir, "temp_untranslated_document.md")
-        with open(temp_untranslated_md_path, 'w', encoding='utf-8') as f:
-            f.write(untranslated_markdown_content)
-        print(f"Untranslated markdown saved to {temp_untranslated_md_path}")
+        if os.path.exists(temp_untranslated_md_path):
+            print(f"Found existing untranslated markdown file at {temp_untranslated_md_path}. Reusing it.")
+        else:
+            print("Untranslated markdown file not found. Parsing PDF...")
+            # 1. Parse PDF into structured elements
+            elements = list(parse_pdf(self.pdf_path))
+            print(f"PDF Parsed into {len(elements)} structural elements.")
+            
+            # 2. Format ALL elements to untranslated Markdown
+            # This will use format_element_to_markdown on original elements.
+            # The marker types (chunk_start_marker, chunk_end_marker, translated_markdown_chunk)
+            # will not be present in 'elements' from parse_pdf, so format_element_to_markdown
+            # will act as a simple formatter for original elements.
+            untranslated_md_elements = [format_element_to_markdown(elem) for elem in elements]
+
+            # 3. Stitch ALL untranslated markdown parts into a single document
+            untranslated_markdown_content = stitch_markdown(untranslated_md_elements)
+            
+            # 4. Save this untranslated Markdown to a temporary file
+            with open(temp_untranslated_md_path, 'w', encoding='utf-8') as f:
+                f.write(untranslated_markdown_content)
+            print(f"Untranslated markdown saved to {temp_untranslated_md_path}")
 
         # Define a system-wide context that applies to all translations
         global_system_context = self.global_system_context # Use from instance variable
@@ -184,13 +177,16 @@ class PdfTranslationAgent:
         output_filename = os.path.splitext(os.path.basename(self.pdf_path))[0] + "_translated.md"
         output_path = os.path.join(self.output_dir, output_filename)
 
-        # Load previous translation state if resuming
-        translated_full_content_str, self._translated_chunks_history = self._load_previous_translation_state(output_path, resume_from_chunk_index)
-        
-        # If resuming, truncate the file to the last known good state to remove any partial writes.
-        # If not resuming, this will effectively create an empty file.
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(translated_full_content_str)
+        # If resuming, load history. If not, clear history and truncate the output file.
+        if resume_from_chunk_index > 0:
+            print(f"Resuming. Loading translation history from {output_path}...")
+            self._translated_chunks_history = self._load_translation_history(output_path, resume_from_chunk_index)
+        else:
+            print(f"Starting new translation. Output file {output_path} will be overwritten.")
+            self._translated_chunks_history = []
+            # Create an empty file to ensure we start fresh
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write("")
 
         # Prepare the chunk iterator, skipping already processed chunks if resuming
         chunk_iterator = self._read_and_chunk_markdown(temp_untranslated_md_path, max_chunk_chars=self.MAX_TRANSLATION_CHUNK_SIZE)
@@ -261,12 +257,31 @@ def main():
     """Main function to run the agent."""
 
     # Load configuration from config.ini
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+    config_file_path = 'config.ini'
+    if not os.path.exists(config_file_path):
+        print(f"Error: Configuration file '{config_file_path}' not found.")
+        print("Please create a 'config.ini' file in the project root with the necessary settings.")
+        return
 
-    pdf_file_path_from_config = config['Translation']['pdf_path']
-    global_system_context_from_config = config['Translation']['global_system_context']
-    base_system_prompt_from_config = config['TranslatorPrompt']['base_system_prompt']
+    config = configparser.ConfigParser()
+    config.read(config_file_path)
+
+    try:
+        pdf_file_path_from_config = config.get('Translation', 'pdf_path')
+        model_name_from_config = config.get('Translation', 'model_name')
+        global_system_context_from_config = config.get('Translation', 'global_system_context', fallback="")
+        base_system_prompt_from_config = config.get('TranslatorPrompt', 'base_system_prompt')
+    except configparser.NoSectionError as e:
+        print(f"Error: Missing section in config.ini: {e}")
+        print("Please ensure 'config.ini' contains '[Translation]' and '[TranslatorPrompt]' sections.")
+        return
+    except configparser.NoOptionError as e:
+        print(f"Error: Missing option in config.ini: {e}")
+        print("Please ensure all required options (e.g., 'pdf_path', 'base_system_prompt', 'model_name') are present in their respective sections.")
+        return
+    except Exception as e:
+        print(f"An unexpected error occurred while reading config.ini: {e}")
+        return
 
     # Use the configured pdf_file_path
     if not os.path.exists(pdf_file_path_from_config):
@@ -277,7 +292,7 @@ def main():
     # Pass base_system_prompt to translator, and global_system_context and pdf_path to agent
     agent = PdfTranslationAgent(
         pdf_path=pdf_file_path_from_config,
-        model_name="gemini-2.5-flash",
+        model_name=model_name_from_config,
         global_system_context=global_system_context_from_config, # Pass to agent
         base_system_prompt=base_system_prompt_from_config # Pass to agent to then pass to translator
     )
